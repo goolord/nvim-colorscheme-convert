@@ -74,7 +74,7 @@ templates.kitty = [[
 background ${bg}
 foreground ${fg}
 cursor ${fg}
-cursor_text_color ${bg} 
+cursor_text_color ${bg}
 
 color0 ${black}
 color1 ${red}
@@ -84,43 +84,75 @@ color4 ${blue}
 color5 ${magenta}
 color6 ${cyan}
 color7 ${white}
-color8  ${bright_black}   
-color9  ${bright_red}     
-color10 ${bright_green}   
-color11 ${bright_yellow}  
-color12 ${bright_blue}    
-color13 ${bright_magenta} 
-color14 ${bright_cyan}    
-color15 ${bright_white}   
+color8  ${bright_black}
+color9  ${bright_red}
+color10 ${bright_green}
+color11 ${bright_yellow}
+color12 ${bright_blue}
+color13 ${bright_magenta}
+color14 ${bright_cyan}
+color15 ${bright_white}
 
 selection_foreground ${bg}
 selection_background ${fg}
 ]]
 
-local colors = {}
+templates.wezterm = [[
+return {
+  colors = {
+    foreground	=	"${fg}",
+    background	=	"${bg}",
+    selection_bg	=	"${fg}",
+    selection_fg	=	"${bg}",
+    cursor_fg	=	"${bg}",
+    cursor_bg	=	"${fg}",
+    ansi = {
+     "${black}",
+     "${red}",
+     "${green}",
+     "${yellow}",
+     "${blue}",
+     "${magenta}",
+     "${cyan}",
+     "${white}",
+    },
+    brights = {
+     "${bright_black}",
+     "${bright_red}",
+     "${bright_green}",
+     "${bright_yellow}",
+     "${bright_blue}",
+     "${bright_magenta}",
+     "${bright_cyan}",
+     "${bright_white}",
+    }
+  }
+}
+]]
 
-colors.alacritty = function()
-	local function formatter(s)
-		return s:sub(2, #s)
-	end
+local formatters = {}
 
-	local template = templates.alacritty
-	local input = utils.buildColorsMap(formatter)
-	return utils.interpolate(template, input)
+formatters.alacritty = function(s)
+	return s:sub(2, #s)
 end
 
-colors.kitty = function()
-	local function formatter(s)
-		return s
-	end
+formatters.kitty = function(s)
+	return s
+end
 
-	local template = templates.kitty
+formatters.wezterm = function(s)
+	return s
+end
+
+local colors = function(terminal)
+	local formatter = formatters[terminal]
+	local template = templates[terminal]
 	local input = utils.buildColorsMap(formatter)
 	return utils.interpolate(template, input)
 end
 
 vim.api.nvim_create_user_command("ColorschemeDump", function(cmd)
-	paste(colors[cmd.args]())
+	paste(colors(cmd.args))
 end, {
 	bang = true,
 	desc = "Paste colors in format $1",
@@ -129,6 +161,6 @@ end, {
 	complete = function(lead, _, _)
 		return vim.tbl_filter(function(x)
 			return x:find(lead, 1, true) == 1
-		end, vim.tbl_keys(colors))
+		end, vim.tbl_keys(templates))
 	end,
 })
