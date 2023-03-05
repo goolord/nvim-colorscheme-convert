@@ -1,37 +1,41 @@
 local function paste(data)
-    vim.api.nvim_paste(data, true, -1)
+	vim.api.nvim_paste(data, true, -1)
 end
 
-local function interp(s, tab)
-    return (s:gsub('($%b{})', function(w) return tab[w:sub(3, -2)] or w end))
+local utils = {}
+
+utils.buildColorsMap = function(format)
+	return {
+		bg = format(vim.g.terminal_color_0),
+		fg = format(vim.g.terminal_color_15),
+		black = format(vim.g.terminal_color_0),
+		red = format(vim.g.terminal_color_1),
+		green = format(vim.g.terminal_color_2),
+		yellow = format(vim.g.terminal_color_3),
+		blue = format(vim.g.terminal_color_4),
+		magenta = format(vim.g.terminal_color_5),
+		cyan = format(vim.g.terminal_color_6),
+		white = format(vim.g.terminal_color_15),
+		bright_black = format(vim.g.terminal_color_8),
+		bright_red = format(vim.g.terminal_color_9),
+		bright_green = format(vim.g.terminal_color_10),
+		bright_yellow = format(vim.g.terminal_color_11),
+		bright_blue = format(vim.g.terminal_color_12),
+		bright_magenta = format(vim.g.terminal_color_13),
+		bright_cyan = format(vim.g.terminal_color_14),
+		bright_white = format(vim.g.terminal_color_15),
+	}
 end
 
-local colors = {}
+utils.interpolate = function(s, tab)
+	return (s:gsub("($%b{})", function(w)
+		return tab[w:sub(3, -2)] or w
+	end))
+end
 
-colors.alacritty = function()
-    local function format(s) return s:sub(2, #s) end
+local templates = {}
 
-    local input = {
-        bg             = format(vim.g.terminal_color_0),
-        fg             = format(vim.g.terminal_color_15),
-        black          = format(vim.g.terminal_color_0),
-        red            = format(vim.g.terminal_color_1),
-        green          = format(vim.g.terminal_color_2),
-        yellow         = format(vim.g.terminal_color_3),
-        blue           = format(vim.g.terminal_color_4),
-        magenta        = format(vim.g.terminal_color_5),
-        cyan           = format(vim.g.terminal_color_6),
-        white          = format(vim.g.terminal_color_15),
-        bright_black   = format(vim.g.terminal_color_8),
-        bright_red     = format(vim.g.terminal_color_9),
-        bright_green   = format(vim.g.terminal_color_10),
-        bright_yellow  = format(vim.g.terminal_color_11),
-        bright_blue    = format(vim.g.terminal_color_12),
-        bright_magenta = format(vim.g.terminal_color_13),
-        bright_cyan    = format(vim.g.terminal_color_14),
-        bright_white   = format(vim.g.terminal_color_15),
-    }
-    return interp([[
+templates.alacritty = [[
 colors:
   # Default colors
   primary:
@@ -64,19 +68,67 @@ colors:
     magenta: '0x${bright_magenta}'
     cyan:    '0x${bright_cyan}'
     white:   '0x${bright_white}'
-]], input)
+]]
+
+templates.kitty = [[
+background ${bg}
+foreground ${fg}
+cursor ${fg}
+cursor_text_color ${bg} 
+
+color0 ${black}
+color1 ${red}
+color2 ${green}
+color3 ${yellow}
+color4 ${blue}
+color5 ${magenta}
+color6 ${cyan}
+color7 ${white}
+color8  ${bright_black}   
+color9  ${bright_red}     
+color10 ${bright_green}   
+color11 ${bright_yellow}  
+color12 ${bright_blue}    
+color13 ${bright_magenta} 
+color14 ${bright_cyan}    
+color15 ${bright_white}   
+
+selection_foreground ${bg}
+selection_background ${fg}
+]]
+
+local colors = {}
+
+colors.alacritty = function()
+	local function formatter(s)
+		return s:sub(2, #s)
+	end
+
+	local template = templates.alacritty
+	local input = utils.buildColorsMap(formatter)
+	return utils.interpolate(template, input)
+end
+
+colors.kitty = function()
+	local function formatter(s)
+		return s
+	end
+
+	local template = templates.kitty
+	local input = utils.buildColorsMap(formatter)
+	return utils.interpolate(template, input)
 end
 
 vim.api.nvim_create_user_command("ColorschemeDump", function(cmd)
-    paste(colors[cmd.args]())
+	paste(colors[cmd.args]())
 end, {
-    bang = true,
-    desc = 'Paste colors in format $1',
-    nargs = 1,
-    bar = true,
-    complete = function (lead, _, _)
-        return vim.tbl_filter(function (x)
-            return x:find(lead, 1, true) == 1
-        end, vim.tbl_keys(colors))
-    end
+	bang = true,
+	desc = "Paste colors in format $1",
+	nargs = 1,
+	bar = true,
+	complete = function(lead, _, _)
+		return vim.tbl_filter(function(x)
+			return x:find(lead, 1, true) == 1
+		end, vim.tbl_keys(colors))
+	end,
 })
