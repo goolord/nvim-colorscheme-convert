@@ -36,38 +36,34 @@ end
 local templates = {}
 
 templates.alacritty = [[
-colors:
-  # Default colors
-  primary:
-    background: '0x${bg}'
-    foreground: '0x${fg}'
+[colors.primary]
+background = '0x${bg}'
+foreground = '0x${fg}'
 
-  # Colors the cursor will use if `custom_cursor_colors` is true
-  cursor:
-    text: '0x${bg}'
-    cursor: '0x${fg}'
+# Colors the cursor will use if `custom_cursor_colors` is true
+[colors.cursor]
+text   = '0x${bg}'
+cursor = '0x${fg}'
 
-  # Normal colors
-  normal:
-    black:   '0x${black}'
-    red:     '0x${red}'
-    green:   '0x${green}'
-    yellow:  '0x${yellow}'
-    blue:    '0x${blue}'
-    magenta: '0x${magenta}'
-    cyan:    '0x${cyan}'
-    white:   '0x${white}'
+[colors.normal]
+black   = '0x${black}'
+red     = '0x${red}'
+green   = '0x${green}'
+yellow  = '0x${yellow}'
+blue    = '0x${blue}'
+magenta = '0x${magenta}'
+cyan    = '0x${cyan}'
+white   = '0x${white}'
 
-  # Bright colors
-  bright:
-    black:   '0x${bright_black}'
-    red:     '0x${bright_red}'
-    green:   '0x${bright_green}'
-    yellow:  '0x${bright_yellow}'
-    blue:    '0x${bright_blue}'
-    magenta: '0x${bright_magenta}'
-    cyan:    '0x${bright_cyan}'
-    white:   '0x${bright_white}'
+[colors.bright]
+black   = '0x${bright_black}'
+red     = '0x${bright_red}'
+green   = '0x${bright_green}'
+yellow  = '0x${bright_yellow}'
+blue    = '0x${bright_blue}'
+magenta = '0x${bright_magenta}'
+cyan    = '0x${bright_cyan}'
+white   = '0x${bright_white}'
 ]]
 
 templates.kitty = [[
